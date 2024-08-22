@@ -27,7 +27,7 @@ const RightSidebar = ({user, transactions, banks}:
 </section>
 <section className="banks">
     <div className="flex w-full justify-between">
-        <h2 className="header-2">My Banks</h2>
+        <h2 className="header-2">My Bank Accounts</h2>
    <Link href="/" className='flex gap-2'>
    <Image src="/icons/plus.svg"
    width={20}
@@ -35,7 +35,7 @@ const RightSidebar = ({user, transactions, banks}:
    alt="plus" />
    <h2 className='text-14 font-semibold
     text-gray-600'>
-        Add Bank
+        Add Account
     </h2>
    </Link>
     </div>
