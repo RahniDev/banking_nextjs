@@ -47,7 +47,7 @@ export async function getLoggedInUser() {
         const user = await account.get();
         return parseStringify(user)
     } catch (error) {
-        return null;
+        console.log(error);
     }
 }
 
