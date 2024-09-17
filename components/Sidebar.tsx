@@ -9,7 +9,6 @@ import Footer from './Footer'
 
 const Sidebar = ({ user }: SiderbarProps) => {
     const pathname = usePathname()
-    console.log(user)
     return (
         <section className='sidebar'>
             <nav className='flex flex-col gap-4'>
@@ -33,18 +32,18 @@ const Sidebar = ({ user }: SiderbarProps) => {
                             })}>
                             <div className="relative size-6">
                                 <Image
-                                src={item.imgURL}
-                                alt={item.label}
-                                fill
-                                className={cn({
-                                    'brightness-[3] invert-0':
-                                    isActive
-                                })}
+                                    src={item.imgURL}
+                                    alt={item.label}
+                                    fill
+                                    className={cn({
+                                        'brightness-[3] invert-0':
+                                            isActive
+                                    })}
                                 />
                             </div>
                             <p className={cn(
                                 'sidebar-label', {
-                                    '!text-white':
+                                '!text-white':
                                     isActive
                             })}>{item.label}</p>
                         </Link>
