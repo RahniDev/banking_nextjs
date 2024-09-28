@@ -12,6 +12,7 @@ import {
     Form
 } from "@/components/ui/form"
 import CustomInput from './CustomInput'
+import PlaidLink from './PlaidLink'
 import { authFormSchema } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -81,7 +82,7 @@ const AuthForm = ({ type }: { type: string }) => {
             </header>
             {user ? (
                 <div className="flex flex-col gap-4">
-                    {/* Plaid Link */}
+                  <PlaidLink user={user} variant="primary" />
                 </div>
             ) : (
                 <>
