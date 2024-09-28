@@ -3,8 +3,14 @@
 import { ID } from "node-appwrite"
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { cookies } from 'next/headers'
-import { parseStringify } from "../utils";
+import { encryptId, parseStringify } from "../utils";
 import { plaidClient } from "../plaid";
+import {
+    ProcessorTokenCreateRequest,
+    ProcessorTokenCreateRequestProcessorEnum
+} from "plaid";
+import { revalidatePath } from "next/cache";
+
 export const signIn = async ({ email, password }: signInProps) => {
     try {
         const { account } = await createAdminClient();
@@ -97,11 +103,47 @@ export const exchangePublicToken = async ({
         const itemId = response.data.item_id;
 
         // Get account info from Plaid using the access token
-    const accountsResponse = await plaidClient.accountsGet({
-        access_token: accessToken
-    })
+        const accountsResponse = await plaidClient.accountsGet({
+            access_token: accessToken
+        })
 
-    const accountsData = accountsResponse.data.accounts[0]
+        const accountsData = accountsResponse.data.accounts[0]
+        // Create a processor token for Dwolla using the access token and account ID
+        const request: ProcessorTokenCreateRequest = {
+            access_token: accessToken,
+            account_id: accountsData.account_id,
+            processor: 'dwolla' as ProcessorTokenCreateRequestProcessorEnum
+        }
+
+        const processorTokenResponse = await plaidClient.processorTokenCreate(request)
+        const processorToken = processorTokenResponse.data.processor_token;
+
+        // Create a funding source URL for the account using the Dwolla customer ID,
+        // processor token and bank name.
+        const fundingSourceUrl = await addFundingSource({
+            dwollaCustomerId: user.dwollaCustomerId,
+            processorToken,
+            bankName: accountsData.name
+        })
+
+        // If the funding source URL is not created, throw an error
+        if (!fundingSourceUrl) throw Error
+
+        await createBankAccount({
+            userId: user.$id,
+            bankId: itemId,
+            accountId: accountsData.account_id,
+            accessToken,
+            fundingSourceUrl,
+            sharableId: encryptId(accountsData.account_id)
+        })
+
+        // Revalidate the path to reflect the changes
+        revalidatePath("/")
+
+        return parseStringify({
+            publicTokenExchange: "complete"
+        })
     } catch (error) {
         console.error("An error occured while creating exchanging token:", error)
     }
