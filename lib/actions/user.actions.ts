@@ -10,7 +10,14 @@ import {
     ProcessorTokenCreateRequestProcessorEnum
 } from "plaid";
 import { revalidatePath } from "next/cache";
+import { addFundingSource } from "./dwolla.actions";
+import { create } from "domain";
 
+const {
+    APPWRITE_DATABASE_ID: DATABASE_ID,
+    APPWRITE_USER_COLLECTION_ID: USER_COLLECTION_ID,
+    APPWRITE_BANK_COLLECTION_ID: BANK_COLLECTION_ID,
+} = process.env;
 export const signIn = async ({ email, password }: signInProps) => {
     try {
         const { account } = await createAdminClient();
@@ -87,6 +94,36 @@ export const createLinkToken = async (user: User) => {
     } catch (error) {
         console.log(error)
     }
+}
+
+export const createBankAccount = async ({
+    userId,
+    bankId,
+    accountId,
+    accessToken,
+    fundingSourceUrl,
+    sharableId
+}: createBankAccountProps) => {
+try {
+const {database} = await createAdminClient()
+const bankAccount = await database.createDocument(
+    DATABASE_ID!,
+    BANK_COLLECTION_ID!,
+    ID.unique(),
+    {
+        userId,
+        bankId,
+        accountId,
+        accessToken,
+        fundingSourceUrl,
+        sharableId
+    }
+)
+return parseStringify(bankAccount)
+
+} catch (error) {
+
+}
 }
 
 export const exchangePublicToken = async ({
